@@ -1,0 +1,14 @@
+Développement d’une API via Flask : 
+
+creation fichier .py : lecture du fichier csv, mise ds un dataframe, nettoyage, creation modle machine learning ==> 
+route /status, (route /visualiation afficher les graphes), route /prediction_jour_suivant (input: variables d'aujourd'hui) 
+
+Utilisation de Git et GitHub pour versionner le code ==> à voir comment on fait
+
+Création d’un documentation claire  ==> ficher read.me
+
+Conteneurisé l’API via Docker
+Creation DockerFile via ubuntu et image
+
+Déployer via Kubernetes  
+creer .yml
