@@ -7,8 +7,13 @@ Utilisation de Git et GitHub pour versionner le code ==> à voir comment on fait
 
 Création d’un documentation claire  ==> ficher read.me
 
+Création de tests unitaire
+   une image par test
+   un docker-compose de l'ensemble
+
 Conteneurisé l’API via Docker
 Creation DockerFile via ubuntu et image
 
 Déployer via Kubernetes  
 creer .yml
+avec un service et un ingress 
