@@ -29,8 +29,9 @@ def preprocess_text(text):
 
 df['Review_Text'] = df['Review_Text'].apply(preprocess_text)
 
-# Premier Modele
+# Premier Modele Le premier modèle consiste à considérer toutes les branches ensemble.
 
+df1 = df.drop(['Branch'], axis=1)
 features = df['Review_Text']
 target = df['Rating']
 
@@ -41,3 +42,34 @@ count_vectorizer_unique = CountVectorizer(max_features=2000)
 
 X_train_cv = count_vectorizer_unique.fit_transform(X_train)
 X_test_cv = count_vectorizer_unique.transform(X_test)
+
+# model_unique = RandomForestClassifier(max_depth=3, n_estimators=100)
+model_unique = LogisticRegression()
+# model_unique = DecisionTreeClassifier(max_depth=8)
+
+model_unique.fit(X_train_cv, y_train)
+
+model_unique.score(X_test_cv, y_test)
+
+#Deuxième modèle Dans ce modele les branches sont séparées en 3
+
+count_vectorizers = {}
+models = {}
+
+for branch in df['Branch'].unique():
+    count_vectorizer = CountVectorizer(max_features=2000)
+#     model = LogisticRegression()
+    model = RandomForestClassifier(n_estimators=20, max_depth=5)
+    
+    df_temp = df[df['Branch'] == branch]
+    
+    X_train, X_test, y_train, y_test = train_test_split(df_temp['Review_Text'], df_temp['Rating'])
+    
+    X_train_cv = count_vectorizer.fit_transform(X_train)
+    X_test_cv = count_vectorizer.transform(X_test)
+    
+    model.fit(X_train_cv, y_train)
+    print(branch, ':', model.score(X_test_cv, y_test))
+    
+    count_vectorizers[branch] = count_vectorizer
+    models[branch] = model
