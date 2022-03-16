@@ -2,7 +2,7 @@ import os
 import requests
 
 # variable d'api
-api_adress = ''
+api_adress = 'api'
 api_port = 8000
 api_endpoint = "v1/review"
 # variable de test

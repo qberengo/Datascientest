@@ -2,7 +2,7 @@ import os
 import requests
 
 # variable d'api
-api_adress = ''
+api_adress = 'api'
 api_port = 8000
 api_endpoint = "v1/review"
 # variable de test
@@ -15,7 +15,7 @@ r = requests.get(url='http://{}:{}/{}'.format(api_adress,api_port,api_endpoint),
 
 output = '''
 ==================================
-	Authentication test
+	    Content test
 ==================================
 
 request done at "/{endpoint}"

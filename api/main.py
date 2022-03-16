@@ -85,27 +85,39 @@ def return_review_v1():
     else:
         raise Unauthorized("Wrong Id")
 
-'''
-#Deuxième modèle Dans ce modele les branches sont séparées en 3
 
-count_vectorizers = {}
-models = {}
+def review_v2(X_test):
+    
+    #Deuxième modèle Dans ce modele les branches sont séparées en 3
 
-for branch in df['Branch'].unique():
-    count_vectorizer = CountVectorizer(max_features=2000)
-#     model = LogisticRegression()
-    model = RandomForestClassifier(n_estimators=20, max_depth=5)
+    count_vectorizers = {}
+    models = {}
+
+    for branch in df['Branch'].unique():
+        count_vectorizer = CountVectorizer(max_features=2000)
+    #     model = LogisticRegression()
+        model = RandomForestClassifier(n_estimators=20, max_depth=5)
+        
+        df_temp = df[df['Branch'] == branch]
+        
+        X_train, X_test, y_train, y_test = train_test_split(df_temp['Review_Text'], df_temp['Rating'])
+        
+        X_train_cv = count_vectorizer.fit_transform(X_train)
+        X_test_cv = count_vectorizer.transform(X_test)
+        
+        model.fit(X_train_cv, y_train)
+        print(branch, ':', model.score(X_test_cv, y_test))
+        
+        count_vectorizers[branch] = count_vectorizer
+        models[branch] = model
     
-    df_temp = df[df['Branch'] == branch]
-    
-    X_train, X_test, y_train, y_test = train_test_split(df_temp['Review_Text'], df_temp['Rating'])
-    
-    X_train_cv = count_vectorizer.fit_transform(X_train)
-    X_test_cv = count_vectorizer.transform(X_test)
-    
-    model.fit(X_train_cv, y_train)
-    print(branch, ':', model.score(X_test_cv, y_test))
-    
-    count_vectorizers[branch] = count_vectorizer
-    models[branch] = model
-'''
+    return models
+
+@app.route('/v2/review', methods=["POST"])
+def return_review_v2():
+    data = requests.get_json()
+    if authenticate_user(data['username'],data['password'])==True:
+        result = review_v2(data['review'])
+        return result
+    else:
+        raise Unauthorized("Wrong Id")
