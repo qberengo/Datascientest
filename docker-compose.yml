@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+  api:
+    image: api_container:latest
+    ports:
+      - "8000:8000"
+  test_status:
+    image: api_status:latest
+    volumes: 
+      - 
+  test_review:
+    image: api_review:latest
+    volumes: 
+      - 
+  test_content:
+    image: api_content:latest
+    volumes: 
+      - 
