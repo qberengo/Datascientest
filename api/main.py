@@ -1,123 +1,49 @@
-
 import pandas as pd
 import numpy as np
-from flask import Flask
-from flask import abort
-from flask import request
-from werkzeug.exceptions import Unauthorized,BadRequest
-from flask import make_response
-from nltk.corpus import stopwords
-from nltk.tokenize import NLTKWordTokenizer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.tree import DecisionTreeClassifier
-
-app = Flask(__name__)
-
-# importation fichier .csv j'ai réduit la taille du fichier csv car il était trop gros pour l'importer dans Github
-df = pd.read_csv(' DisneylandReviews.csv', encoding='cp1252')
-
-user= {"alice": "wonderland", "clementine": "mandarine"}
-
-def authenticate_user(username, password):
-    authenticated_user = False
-    if username in users.keys():
-        if users[username] == password:
-            authenticated_user = True
-    return authenticated_user
+from sklearn.model_selection import train_test_split as tts
+from sklearn.linear_model import LinearRegression 
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
 
 
-# Préparation des données
-df = df.drop(['Review_ID', 'Year_Month', 'Reviewer_Location'], axis=1)
+#             Préparation des données
+# On crée le data frame df à partir du fichier csv
+df = pd.read_csv("bike.csv",sep=',', header=0)
+# Remplacement des valeurs de météo par des catégories numériques
+df = df.replace(to_replace = ['clear','cloudy', 'rainy', 'snowy'], value= [1, 2, 3,4])
+# Conversion du type de colonne
+df['weathersit'] = df['weathersit'].astype('int')
+# Suppression des doublons
+df = df.drop_duplicates()
+# Définition du dictionnaire de fonctions à appliquer
+function_to_apply = {
+    'weathersit' : ['mean'],
+    'hum' : ['min','max','mean'],
+    'windspeed' : ['min','max','mean'],
+    'temp' : ['min','max','mean'],
+    'atemp' : ['min','max','mean'],
+    'cnt' : ['sum'],
+}
+# Agrégation des données par jour et affichage
+df_groupby=df.groupby("dteday").agg(function_to_apply).reset_index()
+df_groupby.columns = df_groupby.columns.droplevel()
+df_groupby.columns = ['dteday','mean_weathersit', 'min_hum', 'max_hum', 'mean_hum','min_windspeed','max_windspeed', 'mean_windspeed','min_temp','max_temp','mean_temp', 'min_atemp', 'max_atemp', 'mean_atemp', 'sum_cnt']
+# Création colonne "weekday" dans le DataFrame contenant une catégorisation du jour de la semaine avec 0 = lundi ... et 6 = dimanche
+df_["weekday"] = df_["dteday"].apply(lambda x : x.weekday())
+# Définition du DataFrame définitif de travail selon les features séléctionnées : 
+bike = df_.drop(["mean_windspeed", "dteday", "mean_temp", "mean_hum" ], axis = 1)
+# Division du DataFrame en 2 autres : X pour les variables explicatives et y pour la cible
+X = bike.drop([ "cnt_"], axis = 1)
+y = bike["cnt_"]
+# Division de ces deux nouveaux DataFrame en des jeux d'entrainements et de tests avec une conservation d'un tier des variables dans les jeux de tests. 
+Xtrain, Xtest, Ytrain, Ytest = tts(X, y, test_size = 0.3)
 
-def preprocess_text(text):
-    stop_words = set(stopwords.words('english'))
-    stop_words.update(["'ve", "", "'ll", "'s", ".", ",", "?", "!", "(", ")", "..", "'m", "n", "u"])
-    tokenizer = NLTKWordTokenizer()
-    
-    text = text.lower()
-    
-    tokens = tokenizer.tokenize(text)
-    tokens = [t for t in tokens if t not in stop_words]
-    
-    return ' '.join(tokens)
-
-df['Review_Text'] = df['Review_Text'].apply(preprocess_text)
-
-def review_v1(X_test):
-    
-    # Premier Modele Le premier modèle consiste à considérer toutes les branches ensemble.
-
-    df1 = df.drop(['Branch'], axis=1)
-    features = df['Review_Text']
-    target = df['Rating']
-
-
-    X_train, X_test, y_train, y_test = train_test_split(features, target)
-
-    count_vectorizer_unique = CountVectorizer(max_features=2000)
-
-    X_train_cv = count_vectorizer_unique.fit_transform(X_train)
-    X_test_cv = count_vectorizer_unique.transform(X_test)
-
-    # model_unique = RandomForestClassifier(max_depth=3, n_estimators=100)
-    model_unique = LogisticRegression()
-    # model_unique = DecisionTreeClassifier(max_depth=8)
-
-    model_unique.fit(X_train_cv, y_train)
-
-   
-    return  model_unique.score(X_test_cv, y_test)
-
-@app.route("/status")
-def status():
-#Renvoie 1 si l'API fonctionne
-    return "1\n"
-
-@app.route('/v1/review',methods=["POST"])
-def return_review_v1():
-    data=request.get_json()
-    if authenticate_user(data['username'],data['password'])==True:
-        review_v1(data['review'])
-        return 
-    else:
-        raise Unauthorized("Wrong Id")
-
-
-def review_v2(X_test):
-    
-    #Deuxième modèle Dans ce modele les branches sont séparées en 3
-
-    count_vectorizers = {}
-    models = {}
-
-    for branch in df['Branch'].unique():
-        count_vectorizer = CountVectorizer(max_features=2000)
-    #     model = LogisticRegression()
-        model = RandomForestClassifier(n_estimators=20, max_depth=5)
-        
-        df_temp = df[df['Branch'] == branch]
-        
-        X_train, X_test, y_train, y_test = train_test_split(df_temp['Review_Text'], df_temp['Rating'])
-        
-        X_train_cv = count_vectorizer.fit_transform(X_train)
-        X_test_cv = count_vectorizer.transform(X_test)
-        
-        model.fit(X_train_cv, y_train)
-        print(branch, ':', model.score(X_test_cv, y_test))
-        
-        count_vectorizers[branch] = count_vectorizer
-        models[branch] = model
-    
-    return models
-
-@app.route('/v2/review', methods=["POST"])
-def return_review_v2():
-    data = requests.get_json()
-    if authenticate_user(data['username'],data['password'])==True:
-        result = review_v2(data['review'])
-        return result
-    else:
-        raise Unauthorized("Wrong Id")
+#               Entrinement du modèle
+lr = LinearRegression() 
+# Entrainement du modèle
+Yfit_lr = lr.fit(Xtrain,Ytrain)
+# Prédiction de la variable cible pour le jeu de données TRAIN
+y_pred_train_lr = lr.predict(Xtrain)
+# Prédiction de la variable cible pour le jeu de données TEST
+y_pred_test_lr = lr.predict(Xtest)
