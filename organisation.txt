@@ -2,6 +2,13 @@ Développement d’une API via Flask :
 
 creation fichier .py : lecture du fichier csv, mise ds un dataframe, nettoyage, creation modle machine learning ==> 
 route /status, (route /visualiation afficher les graphes), route /prediction_jour_suivant (input: variables d'aujourd'hui) 
+Comme il faut les 3 models j'ai essayé de préparer 1 fonction de préparation des données et 3 de prédictions. 
+J'ai repris le "status" route de ta première version
+J'ai préparé une première route pour la LR mais il reste à faire l'input des données du jours J 
+(peut être un peu de traitement dessus ?)
+Et je propose qu'une fois cette route fonctionelle on applique le fonctionnement aux 2 autres models. 
+
+
 
 Utilisation de Git et GitHub pour versionner le code ==> à voir comment on fait
 
