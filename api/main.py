@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from flask import render_template,request, Flask, make_response, abort
+from werkzeug.exceptions import Unauthorized,BadRequest
 from sklearn.model_selection import train_test_split as tts
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LogisticRegression
@@ -77,8 +79,13 @@ def status():
 #Renvoie 1 si l'API fonctionne
     return "1\n"
 
+@app.ruote('/biketomorrow')
+def biketomorrow():
+    return render_template('form.html')
+
 @app.route('/biketomorrow/LR',methods=["POST"])
 def biketomorrow_LR():
+    form_data = request.form #form_data est un dictionnaire de forme {'nom input':'input'}
     data=request.get_json()
     if authenticate_user(data['username'],data['password'])==True:
         Yfit = prepa_data()
