@@ -7,6 +7,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsRegressor
 
+
+app = Flask(__name__)
+
 #             Récupération des users et password
 df_users=pd.read_csv('credentials.csv', sep =',')
 users = dict([(i,j) for i,j in zip (df_users['username'],df_users['password'])])
@@ -121,3 +124,7 @@ def biketomorrow_LR():
         return "There will be {} bike predicted tomorrow with the KNeighbors Regressor model".format(result)
     else:
         raise Unauthorized("Wrong Id")
+        
+        
+if __name__ = "__main__":
+    app.run(host="0.0.0.0",debug=True)
