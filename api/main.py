@@ -7,6 +7,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsRegressor
 
+#             Récupération des users et password
+df_users=pd.read_csv('credentials.csv', sep =',')
+users = dict([(i,j) for i,j in zip (df_users['username'],df_users['password'])])
 
 def prepa_data():
     #             Préparation des données
@@ -39,7 +42,7 @@ def prepa_data():
     X = bike.drop([ "cnt_"], axis = 1)
     y = bike["cnt_"]
     
-    #               Entrinement du modèle linéaire
+    #               Entrainement du modèle linéaire
     lr = LinearRegression() 
     # Entrainement du modèle
     Yfit_lr = lr.fit(X,y)
@@ -79,10 +82,22 @@ def status():
 #Renvoie 1 si l'API fonctionne
     return "1\n"
 
-@app.ruote('/biketomorrow')
+@app.route('/biketomorrow')
 def biketomorrow():
     return render_template('form.html')
 
+@app.route('/biketomorrow/KGH',methods=["POST"])
+def biketomorrow_KGH():
+    form_data = request.form #form_data est un dictionnaire de forme {'nom input':'input'}
+    data=request.get_json()
+    if authenticate_user(data['username'],data['password'])==True:
+        Yfit = prepa_data()
+        result = linear_model(Yfit, data['daily'])
+        return "There will be {} bike tomorrow".format(result)
+    else:
+        raise Unauthorized("Wrong Id")
+
+        
 @app.route('/biketomorrow/LR',methods=["POST"])
 def biketomorrow_LR():
     form_data = request.form #form_data est un dictionnaire de forme {'nom input':'input'}
@@ -90,6 +105,18 @@ def biketomorrow_LR():
     if authenticate_user(data['username'],data['password'])==True:
         Yfit = prepa_data()
         result = linear_model(Yfit, data['daily'])
+        return "There will be {} bike tomorrow".format(result)
+    else:
+        raise Unauthorized("Wrong Id")
+        
+        
+@app.route('/biketomorrow/LGST',methods=["POST"])
+def biketomorrow_LGST():
+    form_data = request.form #form_data est un dictionnaire de forme {'nom input':'input'}
+    data=request.get_json()
+    if authenticate_user(data['username'],data['password'])==True:
+        Yfit = prepa_data()
+        result = logistic_model(Yfit, data['daily'])
         return "There will be {} bike tomorrow".format(result)
     else:
         raise Unauthorized("Wrong Id")
