@@ -86,37 +86,38 @@ def status():
 def biketomorrow():
     return render_template('form.html')
 
-@app.route('/biketomorrow/KGH',methods=["POST"])
+@app.route('/biketomorrow/LR',methods=["POST"])
 def biketomorrow_KGH():
     form_data = request.form #form_data est un dictionnaire de forme {'nom input':'input'}
     data=request.get_json()
     if authenticate_user(data['username'],data['password'])==True:
-        Yfit = prepa_data()
-        result = linear_model(Yfit, data['daily'])
-        return "There will be {} bike tomorrow".format(result)
+        Yfit_lr, Yfit_logR, Yfit_knR = prepa_data()
+        result = linear_model(Yfit_lr, data['daily'])
+        return "There will be {} bike predicted tomorrow with the Linear Regression model".format(result)
     else:
         raise Unauthorized("Wrong Id")
 
+     
         
-@app.route('/biketomorrow/LR',methods=["POST"])
-def biketomorrow_LR():
-    form_data = request.form #form_data est un dictionnaire de forme {'nom input':'input'}
-    data=request.get_json()
-    if authenticate_user(data['username'],data['password'])==True:
-        Yfit = prepa_data()
-        result = linear_model(Yfit, data['daily'])
-        return "There will be {} bike tomorrow".format(result)
-    else:
-        raise Unauthorized("Wrong Id")
-        
-        
-@app.route('/biketomorrow/LGST',methods=["POST"])
+@app.route('/biketomorrow/LOGR',methods=["POST"])
 def biketomorrow_LGST():
     form_data = request.form #form_data est un dictionnaire de forme {'nom input':'input'}
     data=request.get_json()
     if authenticate_user(data['username'],data['password'])==True:
-        Yfit = prepa_data()
-        result = logistic_model(Yfit, data['daily'])
-        return "There will be {} bike tomorrow".format(result)
+        Yfit_lr, Yfit_logR, Yfit_knR = prepa_data()
+        result = logistic_model(Yfit_logR, data['daily'])
+        return "There will be {} bike predicted tomorrow with the Logistic Regression model".format(result)
+    else:
+        raise Unauthorized("Wrong Id")
+        
+                
+@app.route('/biketomorrow/KNR',methods=["POST"])
+def biketomorrow_LR():
+    form_data = request.form #form_data est un dictionnaire de forme {'nom input':'input'}
+    data=request.get_json()
+    if authenticate_user(data['username'],data['password'])==True:
+        Yfit_lr, Yfit_logR, Yfit_knR = prepa_data()
+        result = kneighbor_model(Yfit_knR, data['daily'])
+        return "There will be {} bike predicted tomorrow with the KNeighbors Regressor model".format(result)
     else:
         raise Unauthorized("Wrong Id")
