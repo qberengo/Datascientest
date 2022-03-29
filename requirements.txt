@@ -1,5 +1,5 @@
 pip3 install requests
 pip3 install Flask
 sudo apt install python3-flask
-pip3 install vaderSentiment
+pip install scikit-learn
 pip3 install pandas
