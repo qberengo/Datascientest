@@ -84,21 +84,21 @@ def authenticate_user(username, password):
 
 def check_data(data):
     # Vérification que les données récupérée soit cohérente avec celle que nous avons observées
-
-    if data['meteo'] is in ['clear','cloudy', 'rainy', 'snowy']:
+    error = []
+    if data['meteo'] in ['clear','cloudy', 'rainy', 'snowy']:
         meteo = ['clear','cloudy', 'rainy', 'snowy'].index(data['meteo'], 1, 4) # en supposant qu'une météo soit entrée parmis les 4 possible on ressort avec son mode
-    else raise "Wrong Meteo"
-    if data['day'] is in ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]:
+    else: error.append("Wrong Meteo")
+    if data['day'] in ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]:
         day = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].index(data['day'], 0, 6) #en supposant que qu'un jour de la semaine est entrée, on ressort avec son mode
-    else raise "Wrong WeekDay"
+    else: error.append("Wrong WeekDay")
     if -10.7 < data['temp'] < 39.4: #ici j'ai pris les min et max présent dans le DF bike
         temp = data['temp']
-    else raise "Wrong Temperature"
+    else: error.append("Wrong Temperature")
     if 22 < data['bike'] < 8714: #idem
         bike = data['bike']
-    else raise "Wrong bike number" #Si la vérification se conclue par une erreur alors ce sera la valeur de daily
+    else: error.append("Wrong bike number") #Si la vérification se conclue par une erreur alors ce sera la valeur de daily
     daily = [meteo, temp, bike, day] #les données sont rangée dans le même ordre que les colonnes du DF bike
-    return daily
+    return daily, error
 
 @app.route("/status")
 def status():
@@ -114,15 +114,15 @@ def permissions():
         raise Unauthorized("Wrong Id")
 
 @app.route('/biketomorrow/LR',methods=["POST"])
-def biketomorrow_KGH():
-    data=request.get_json()
+def biketomorrow_LR():
+    data=request.get_json() #data atendu exemple : {'username':'Quinlan','password':5210,'meteo':'rainy','temp':10,'bike':327,'day':'Wednesday'}
     if authenticate_user(data['username'],data['password'])==True:
         daily = check_data(data)
-        if type(daily) == list: 
+        if len(error) == 0:
             Yfit_lr, Yfit_logR, Yfit_knR = prepa_data()
             result = linear_model(Yfit_lr, daily)
             return "There will be {} bike predicted tomorrow with the Linear Regression model".format(result)
-        else raise "Wrong daily data"
+        else: return error
     else:
         raise Unauthorized("Wrong Id")
 
@@ -141,7 +141,7 @@ def biketomorrow_LGST():
         
                 
 @app.route('/biketomorrow/KNR',methods=["POST"])
-def biketomorrow_LR():
+def biketomorrow_KGH():
     form_data = request.form #form_data est un dictionnaire de forme {'nom input':'input'}
     data=request.get_json()
     if authenticate_user(data['username'],data['password'])==True:
