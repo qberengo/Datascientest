@@ -82,6 +82,24 @@ def authenticate_user(username, password):
             authenticated_user = True
     return authenticated_user
 
+def check_data(data):
+    # Vérification que les données récupérée soit cohérente avec celle que nous avons observées
+
+    if data['meteo'] is in ['clear','cloudy', 'rainy', 'snowy']:
+        meteo = ['clear','cloudy', 'rainy', 'snowy'].index(data['meteo'], 1, 4) # en supposant qu'une météo soit entrée parmis les 4 possible on ressort avec son mode
+    else raise "Wrong Meteo"
+    if data['day'] is in ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]:
+        day = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].index(data['day'], 0, 6) #en supposant que qu'un jour de la semaine est entrée, on ressort avec son mode
+    else raise "Wrong WeekDay"
+    if -10.7 < data['temp'] < 39.4: #ici j'ai pris les min et max présent dans le DF bike
+        temp = data['temp']
+    else raise "Wrong Temperature"
+    if 22 < data['bike'] < 8714: #idem
+        bike = data['bike']
+    else raise "Wrong bike number" #Si la vérification se conclue par une erreur alors ce sera la valeur de daily
+    daily = [meteo, temp, bike, day] #les données sont rangée dans le même ordre que les colonnes du DF bike
+    return daily
+
 @app.route("/status")
 def status():
 #Renvoie 1 si l'API fonctionne
@@ -95,19 +113,16 @@ def permissions():
     else:
         raise Unauthorized("Wrong Id")
 
-
-@app.route('/biketomorrow')
-def biketomorrow():
-    return render_template("form.html")
-
 @app.route('/biketomorrow/LR',methods=["POST"])
 def biketomorrow_KGH():
-    form_data = request.form #form_data est un dictionnaire de forme {'nom input':'input'}
     data=request.get_json()
     if authenticate_user(data['username'],data['password'])==True:
-        Yfit_lr, Yfit_logR, Yfit_knR = prepa_data()
-        result = linear_model(Yfit_lr, data['daily'])
-        return "There will be {} bike predicted tomorrow with the Linear Regression model".format(result)
+        daily = check_data(data)
+        if type(daily) == list: 
+            Yfit_lr, Yfit_logR, Yfit_knR = prepa_data()
+            result = linear_model(Yfit_lr, daily)
+            return "There will be {} bike predicted tomorrow with the Linear Regression model".format(result)
+        else raise "Wrong daily data"
     else:
         raise Unauthorized("Wrong Id")
 
