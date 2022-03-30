@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split as tts
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsRegressor
-
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 app = Flask(__name__)
 
@@ -100,6 +100,16 @@ def check_data(data):
     daily = [meteo, temp, bike, day] #les données sont rangée dans le même ordre que les colonnes du DF bike
     return daily, error
 
+def metrics(Ytest,y_pred_test)
+# MSE 
+mse = mean_squared_error(Ytest,y_pred_test,squared=True)
+# RMSE
+rmse = mean_squared_error(Ytest,y_pred_test,squared=False)
+# MAE
+mae = mean_absolute_error(Ytest,y_pred_test)
+# R2
+r2 = r2_score(Ytest,y_pred_test)
+
 @app.route("/status")
 def status():
 #Renvoie 1 si l'API fonctionne
@@ -126,7 +136,26 @@ def biketomorrow_LR():
     else:
         raise Unauthorized("Wrong Id")
 
-     
+@app.route('/metrics/LR', methods=["POST"])
+def metrics_LR():
+    data=request.get_json()
+    if authenticate_user(data['username'],data['password'])==True:
+        daily = check_data(data)
+        if len(error) == 0:
+            Yfit_lr, Yfit_logR, Yfit_knR = prepa_data()
+            result = linear_model(Yfit_lr, daily)
+            mse, rmse, mae, r2 = metrics(daily, result)
+            output : '''
+            The model Linear Regression metrics : 
+            MSE : {}
+            RMSE : {}
+            MAE : {}
+            R2 : {}
+            ''''
+            return output.format(mse, rmse, mae, r2)
+        else: return error
+    else:
+        raise Unauthorized("Wrong Id")
         
 @app.route('/biketomorrow/LOGR',methods=["POST"])
 def biketomorrow_LGST():
