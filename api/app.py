@@ -42,11 +42,11 @@ def prepa_data():
     df_["weekday"] = df_["dteday"].apply(lambda x : x.weekday())
     # Définition du DataFrame définitif de travail selon les features séléctionnées : 
     bike = df_.drop(["mean_windspeed", "dteday", "mean_temp", "mean_hum" ], axis = 1)
+    bike.head(5)
     # Division du DataFrame en 2 autres : X pour les variables explicatives et y pour la cible
     X = bike.drop([ "cnt_"], axis = 1)
     y = bike["cnt_"]
-    
-    #               Entrainement du modèle linéaire
+    # Entrainement du modèle linéaire
     lr = LinearRegression() 
     # Entrainement du modèle
     Yfit_lr = lr.fit(X,y)
@@ -65,13 +65,15 @@ def linear_model(Yfit_lr, daily):
     # Prédiction de la variable cible pour le jeu de données TEST
     y_pred_lr = Yfit_lr.predict(daily)
     return y_pred_lr
+
 def logistic_model(Yfit_logR, daily):
     # Prédiction de la variable cible pour le jeu de données TEST
-    y_pred_lr = Yfit_logR.predict(daily)
+    y_pred_logR = Yfit_logR.predict(daily)
     return y_pred_logR
+
 def kneighbor_model(Yfit_knR, daily):
     # Prédiction de la variable cible pour le jeu de données TEST
-    y_pred_lr = Yfit_knR.predict(daily)
+    y_pred_knR = Yfit_knR.predict(daily)
     return y_pred_knR
 
 def authenticate_user(username, password):
@@ -100,15 +102,16 @@ def check_data(data):
     daily = [meteo, temp, bike, day] #les données sont rangée dans le même ordre que les colonnes du DF bike
     return daily, error
 
-def metrics(Ytest,y_pred_test)
-# MSE 
-mse = mean_squared_error(Ytest,y_pred_test,squared=True)
-# RMSE
-rmse = mean_squared_error(Ytest,y_pred_test,squared=False)
-# MAE
-mae = mean_absolute_error(Ytest,y_pred_test)
-# R2
-r2 = r2_score(Ytest,y_pred_test)
+def metrics(Ytest,y_pred_test):
+    # MSE 
+    mse = mean_squared_error(Ytest,y_pred_test,squared=True)
+    # RMSE
+    rmse = mean_squared_error(Ytest,y_pred_test,squared=False)
+    # MAE
+    mae = mean_absolute_error(Ytest,y_pred_test)
+    # R2
+    r2 = r2_score(Ytest,y_pred_test)
+    return  mse, rmse, mae, r2
 
 @app.route("/status")
 def status():
@@ -127,7 +130,7 @@ def permissions():
 def biketomorrow_LR():
     data=request.get_json() #data atendu exemple : {'username':'Quinlan','password':5210,'meteo':'rainy','temp':10,'bike':327,'day':'Wednesday'}
     if authenticate_user(data['username'],data['password'])==True:
-        daily = check_data(data)
+        daily,error = check_data(data)
         if len(error) == 0:
             Yfit_lr, Yfit_logR, Yfit_knR = prepa_data()
             result = linear_model(Yfit_lr, daily)
@@ -140,7 +143,7 @@ def biketomorrow_LR():
 def metrics_LR():
     data=request.get_json()
     if authenticate_user(data['username'],data['password'])==True:
-        daily = check_data(data)
+        daily,error = check_data(data)
         if len(error) == 0:
             Yfit_lr, Yfit_logR, Yfit_knR = prepa_data()
             result = linear_model(Yfit_lr, daily)
@@ -151,7 +154,7 @@ def metrics_LR():
             RMSE : {}
             MAE : {}
             R2 : {}
-            ''''
+            '''
             return output.format(mse, rmse, mae, r2)
         else: return error
     else:
