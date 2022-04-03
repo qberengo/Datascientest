@@ -27,10 +27,8 @@ actual result = {status}
 
 status_code = r.status_code
 if status_code == int(expect_result):
-	test_result = 'SUCCESS'
-else: test_result = 'FAILURE'
+	test_result = 'SUCCESS, notre API marche bien'
+else: test_result = 'FAILURE, notre API ne marche pas'
 print(output.format(endpoint=api_endpoint,result=expect_result,status=status_code,test=test_result))
 
-if os.environ.get('LOG') == 1:
-	with open('api_test.log','a') as file:
-		file.write(output)
+
