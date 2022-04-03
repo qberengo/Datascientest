@@ -29,10 +29,8 @@ actual result = {status}
 
 status_code = r.status_code
 if status_code == int(expect_result):
-	test_result = 'SUCCESS'
-else: test_result = 'FAILURE'
+	test_result = 'SUCCESS, your ID is authorized'
+else: test_result = 'FAILURE, wrong ID'
 print(output.format(endpoint=api_endpoint,user=param_user,psw=param_psw,result=expect_result,status=status_code,test=test_result))
 
-if os.environ.get('LOG') == 1:
-	with open('api_test.log','a') as file:
-		file.write(output)
+
