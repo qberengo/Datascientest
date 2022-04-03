@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+  labels:
+    app: my-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata: 
+      labels: 
+        app: my-app
+    spec:
+      containers:
+      - name: myapi
+        image: liendockerhub/myapi
+        ports:
+        - containerPort: 5000
+      - name: test_status
+        image: liendockerhub/test_status:latest
+        ports:
+        - containerPort: 5000
+      - name: test_authentification
+        image: liendockerhub/test_authentification:latest
+        ports:
+        - containerPort: 5000
+      - name: test_biketomorrow_LR
+        image: liendockerhub/test_biketomorrow_LR:latest
+        ports:
+        - containerPort: 5000
+      - name: test_metrics_LR
+        image: liendockerhub/test_metrics_LR:latest
+        ports:
+        - containerPort: 5000
+      - name: test_biketomorrow_LOGR
+        image: liendockerhub/test_biketomorrow_LOGR:latest
+        ports:
+        - containerPort: 5000
+      - name: test_biketomorrow_KNR
+        image: liendockerhub/test_biketomorrow_KNR:latest
+        ports:
+        - containerPort: 5000
+  
