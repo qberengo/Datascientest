@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: myapi
-        image: dinafl/projet2_myapi:latest
+        image: 590388/projet2_my_api:latest
         ports:
         - containerPort: 5000
       - name: test-status
@@ -39,8 +39,5 @@ spec:
         image: dinafl/projet2_test_biketomorrow_logr:latest
         ports:
         - containerPort: 5000
-      - name: test-biketomorrow-knr
-        image: dinafl/projet2_test_biketomorrow_knr:latest
-        ports:
-        - containerPort: 5000
+      
   
