@@ -14,4 +14,4 @@ Puis de lancer le fichier start.sh:
 sh ./start.sh
 L'API est ensuite disponible à l'adresse http://localhost:8000.
 
-La documentation est présente au point d'entrée /docs.
+La documentation est présente au point d'entrée docs.txt
