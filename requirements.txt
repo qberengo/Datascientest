@@ -1,5 +1,5 @@
-pip3 install requests
-pip3 install Flask
-sudo apt install python3-flask
-pip install scikit-learn
-pip3 install pandas
+requests
+Flask
+python3-flask
+scikit-learn
+pandas
