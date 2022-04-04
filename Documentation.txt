@@ -29,7 +29,7 @@ Si les données ne sont pas au bon format, une erreur est renvoyée précisant q
 Enfin, dans une optique de gain de temps, nous nous sommes limités à une seule page metrics même si elle est duplicable aux autres modèles. Nous avons choisi de mettre en avant le modèle de la régression linéaire, car c'est celui qui avait porté les meilleurs résultats durant la première partie de notre projet. 
 
 
-Nous avons proposé 6 tests qui vérifie le bon fonctionnement des 6 routes présentées ci-dessus et renvoyant un message selon le modèle suivant : 
+Nous avons proposé des tests qui vérifient le bon fonctionnement des  routes présentées ci-dessus et renvoyant un message selon le modèle suivant : 
 
 ==================================
 	test name
