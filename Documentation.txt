@@ -51,4 +51,7 @@ actual result = {status}
 
 Avec la route et les variable utilisées puis le résultat attendu / résultat obtenu et enfin "FAILLURE" ou "SUCCES". 
 
-Enfin, nous avons créé des images Dockers pour l'API et les tests et avons fait un déploiment avec Kubernetes à partir des fichiers my_deployment.yml, my_service.yml et my_ingress.yml
+Enfin, nous avons créé des images Dockers pour le fichier principal de l'API et les tests et avons fait un déploiment avec Kubernetes à partir des fichiers :
+- my_deployment.yml: déploiement du pod avec 3 répliques
+- my_service.yml : exposition de l'API rendre disponible les trois répliques. On crée un Service de type ClusterIP.
+- my_ingress.yml : on crée un Ingress pour exposer le service à l'extérieur du cluster
