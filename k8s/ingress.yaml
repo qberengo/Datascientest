@@ -1,0 +1,12 @@
+# Optionnel (version 2022) : nécessite un contrôleur Ingress (ex. ingress-nginx) installé dans le cluster.
+# Sur Docker Desktop, le Service LoadBalancer suffit pour accéder à l'API.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bike-api
+spec:
+  defaultBackend:
+    service:
+      name: bike-api
+      port:
+        number: 5000

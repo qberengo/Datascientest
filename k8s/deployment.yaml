@@ -1,0 +1,30 @@
+# 3 répliques de l'API. Les images sont construites sur le PC (docker compose build) :
+# imagePullPolicy: Never => Kubernetes ne va pas les chercher sur Docker Hub.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bike-api
+  labels:
+    app: bike-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: bike-api
+  template:
+    metadata:
+      labels:
+        app: bike-api
+    spec:
+      containers:
+        - name: api
+          image: bike-api:1.0
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          readinessProbe:          # une réplique ne reçoit du trafic que si /status répond
+            httpGet:
+              path: /status
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5

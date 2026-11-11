@@ -1,0 +1,17 @@
+# Joue les 6 tests une fois, depuis l'intérieur du cluster, contre le Service.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: bike-tests
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: tests
+          image: bike-tests:1.0
+          imagePullPolicy: Never
+          env:
+            - name: API_HOST
+              value: bike-api

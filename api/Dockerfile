@@ -1,8 +1,8 @@
-FROM debian:latest
-RUN apt-get update && apt-get install python3-pip -y && pip3 install Flask && pip3 install requests && pip3 install scikit-learn && pip3 install pandas
+# Image de l'API : Python officiel, version légère (fonctionne sur processeurs Intel/AMD et ARM)
+FROM python:3.13-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY app.py bike.csv credentials.csv ./
 EXPOSE 5000
-ADD app.py /data/app.py
-ADD bike.csv /data/bike.csv
-ADD credentials.csv /data/credentials.csv
-WORKDIR /data/
-CMD python3 app.py
+CMD ["python", "app.py"]

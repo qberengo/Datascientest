@@ -1,5 +1,0 @@
-requests
-Flask
-python3-flask
-scikit-learn
-pandas

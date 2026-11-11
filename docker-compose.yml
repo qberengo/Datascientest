@@ -1,0 +1,23 @@
+# Lancement en une commande :  docker compose up --build
+# - "api"   : l'API Flask, accessible sur http://localhost:5000
+# - "tests" : joue les 6 tests dès que l'API répond, puis s'arrête
+services:
+  api:
+    build: ./api
+    image: bike-api:1.0
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/status')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  tests:
+    build: ./tests
+    image: bike-tests:1.0
+    environment:
+      API_HOST: api
+    depends_on:
+      api:
+        condition: service_healthy

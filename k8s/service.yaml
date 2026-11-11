@@ -1,0 +1,14 @@
+# Point d'entrée unique vers les 3 répliques.
+# Sur Docker Desktop, un Service de type LoadBalancer est exposé sur http://localhost:5000
+apiVersion: v1
+kind: Service
+metadata:
+  name: bike-api
+spec:
+  type: LoadBalancer
+  selector:
+    app: bike-api
+  ports:
+    - port: 5000
+      targetPort: 5000
+      protocol: TCP
