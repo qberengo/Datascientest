@@ -55,3 +55,9 @@ Enfin, nous avons créé des images Dockers pour le fichier principal de l'API e
 - my_deployment.yml: déploiement du pod avec 3 répliques
 - my_service.yml : exposition de l'API rendre disponible les trois répliques. On crée un Service de type ClusterIP.
 - my_ingress.yml : on crée un Ingress pour exposer le service à l'extérieur du cluster
+
+
+Mise à jour 2026 :
+ - Valeurs acceptées pour 'meteo' : 'clear' (clair), 'cloudy' (nuageux/brume), 'rainy' (pluie ou neige légère), 'stormy' (fortes intempéries : orage, forte pluie, neige + brouillard). Les données viennent du jeu public UCI Bike Sharing (heures, Washington 2011-2012), dont les catégories 3 et 4 étaient inversées dans bike.csv.
+ - Valeurs acceptées pour 'day' : 'Monday' à 'Sunday'.
+ - Une donnée invalide renvoie une erreur 400 listant les champs en cause.
