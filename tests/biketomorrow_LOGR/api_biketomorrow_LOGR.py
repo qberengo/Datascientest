@@ -2,7 +2,7 @@ import os
 import requests
 
 # variable d'api
-api_adress = '0.0.0.0'
+api_adress = os.environ.get('API_HOST', '0.0.0.0')
 api_port = 5000
 api_endpoint = "biketomorrow/LOGR"
 # variable de test
