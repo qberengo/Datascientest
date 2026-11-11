@@ -9,6 +9,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 app = Flask(__name__)
+app.json.ensure_ascii = False  # affiche les accents tels quels dans les réponses JSON
 
 #             Récupération des users et password
 df_users=pd.read_csv('credentials.csv', sep =',')
@@ -95,6 +96,23 @@ def metrics(y,y_pred):
     # R2
     r2 = r2_score(y,y_pred)
     return  mse, rmse, mae, r2
+
+@app.route("/")
+def index():
+    # Page d'accueil : liste des routes disponibles
+    return {
+        "api": "Prévision du nombre de vélos loués le lendemain",
+        "routes": {
+            "GET /status": "renvoie 1 si l'API fonctionne",
+            "POST /permissions": "vérifie username et password",
+            "POST /biketomorrow/LR": "prédiction par régression linéaire",
+            "POST /biketomorrow/KNR": "prédiction par k plus proches voisins",
+            "POST /biketomorrow/LOGR": "prédiction par régression logistique",
+            "POST /metrics/LR": "métriques du modèle linéaire",
+        },
+        "exemple_de_corps_json": {"username": "Quinlan", "password": 5210, "meteo": "rainy",
+                                  "temp": 10, "bike": 3000, "day": "Wednesday"},
+    }
 
 @app.route("/status")
 def status():
