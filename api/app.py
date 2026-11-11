@@ -18,7 +18,8 @@ users = dict([(i,j) for i,j in zip (df_users['username'],df_users['password'])])
 # On crée le data frame df à partir du fichier csv
 df = pd.read_csv("bike.csv",sep=',', header=0)
 # Remplacement des valeurs de météo par des catégories numériques
-df = df.replace(to_replace = ['clear','cloudy', 'rainy', 'snowy'], value= [1, 2, 3,4])
+# Encodage UCI : 1 = clair, 2 = nuageux/brume, 3 = pluie ou neige légère, 4 = fortes intempéries (orage, forte pluie, neige + brouillard)
+df = df.replace(to_replace = ['clear','cloudy', 'rainy', 'stormy'], value= [1, 2, 3,4])
 # Conversion du type de colonne
 df['weathersit'] = df['weathersit'].astype('int')
 # Suppression des doublons
@@ -39,7 +40,7 @@ df_groupby.columns = ['dteday','mean_weathersit', 'min_hum', 'max_hum', 'mean_hu
 # Création d'un DataFrame sans la colonne heure
 df_ = df_groupby.drop(columns = ['min_hum', 'max_hum', 'min_windspeed','max_windspeed','min_temp','max_temp','min_atemp', 'max_atemp'])
 # Définition de la colonne dteday d'un type temps 
-df_["dteday"] = df_["dteday"].astype(np.datetime64)
+df_["dteday"] = df_["dteday"].astype("datetime64[ns]")
 # On crée une nouvelle colonne à la fin avec le nombre de vélo du jour suivant
 df_['cnt_']=0
 for i in range(df_.shape[0]-1):
@@ -64,28 +65,31 @@ def authenticate_user(username, password):
     return authenticated_user
 
 def check_data(data):
-    # Vérification que les données récupérée soit cohérente avec celle que nous avons observées
+    # Vérification que les données reçues sont cohérentes avec celles du jeu d'entraînement
+    METEOS = ['clear', 'cloudy', 'rainy', 'stormy']  # encodées 1 à 4 à l'entraînement
+    DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]  # 0 = lundi ... 6 = dimanche
     error = []
-    if data['meteo'] in ['clear','cloudy', 'rainy', 'snowy']:
-        meteo = ['clear','cloudy', 'rainy', 'snowy'].index(data['meteo'], 1, 4) # en supposant qu'une météo soit entrée parmis les 4 possible on ressort avec son mode
+    meteo = day = temp = bike = None
+    if data.get('meteo') in METEOS:
+        meteo = METEOS.index(data['meteo']) + 1  # même encodage que df.replace(...) : clear=1 ... stormy=4
     else: error.append("Wrong Meteo")
-    if data['day'] in ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]:
-        day = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].index(data['day'], 0, 6) #en supposant que qu'un jour de la semaine est entrée, on ressort avec son mode
+    if data.get('day') in DAYS:
+        day = DAYS.index(data['day'])  # même encodage que weekday() : lundi=0 ... dimanche=6
     else: error.append("Wrong WeekDay")
-    if -10.7 < data['temp'] < 39.4: #ici j'ai pris les min et max présent dans le DF bike
+    if isinstance(data.get('temp'), (int, float)) and -10.7 < data['temp'] < 39.4:  # min et max présents dans le DF bike
         temp = data['temp']
     else: error.append("Wrong Temperature")
-    if 22 < data['bike'] < 8714: #idem
+    if isinstance(data.get('bike'), (int, float)) and 22 < data['bike'] < 8714:  # idem
         bike = data['bike']
-    else: error.append("Wrong bike number") #Si la vérification se conclue par une erreur alors ce sera la valeur de daily
-    daily = [meteo, temp, bike, day] #les données sont rangée dans le même ordre que les colonnes du DF bike
+    else: error.append("Wrong bike number")
+    daily = [meteo, temp, bike, day]  # même ordre que les colonnes du DF bike
     return daily, error
 
 def metrics(y,y_pred):
     # MSE 
-    mse = mean_squared_error(y,y_pred,squared=True)
+    mse = mean_squared_error(y,y_pred)
     # RMSE
-    rmse = mean_squared_error(y,y_pred,squared=False)
+    rmse = np.sqrt(mean_squared_error(y,y_pred))
     # MAE
     mae = mean_absolute_error(y,y_pred)
     # R2
@@ -110,6 +114,8 @@ def biketomorrow_LR():
     data=request.get_json() #data atendu exemple : {'username':'Quinlan','password':5210,'meteo':'rainy','temp':10,'bike':327,'day':'Wednesday'}
     if authenticate_user(data['username'],data['password'])==True:
         daily,error = check_data(data)
+        if len(error) > 0:
+            raise BadRequest(", ".join(error))
         ar = np.array([daily])
         X_test_user = pd.DataFrame(ar, columns=['mean_weathersit','mean_atemp', 'sum_cnt', 'weekday'])
         if len(error) == 0:
@@ -129,6 +135,8 @@ def metrics_LR():
     data=request.get_json()
     if authenticate_user(data['username'],data['password'])==True:
         daily,error = check_data(data)
+        if len(error) > 0:
+            raise BadRequest(", ".join(error))
         ar = np.array([daily])
         X_test_user = pd.DataFrame(ar, columns=['mean_weathersit','mean_atemp', 'sum_cnt', 'weekday'])
         if len(error) == 0:
@@ -165,6 +173,8 @@ def biketomorrow_LGST():
     data=request.get_json() #data atendu exemple : {'username':'Quinlan','password':5210,'meteo':'rainy','temp':10,'bike':327,'day':'Wednesday'}
     if authenticate_user(data['username'],data['password'])==True:
         daily,error = check_data(data)
+        if len(error) > 0:
+            raise BadRequest(", ".join(error))
         ar = np.array([daily])
         X_test_user = pd.DataFrame(ar, columns=['mean_weathersit','mean_atemp', 'sum_cnt', 'weekday'])
         if len(error) == 0:
@@ -185,6 +195,8 @@ def biketomorrow_KGH():
     data=request.get_json() #data atendu exemple : {'username':'Quinlan','password':5210,'meteo':'rainy','temp':10,'bike':327,'day':'Wednesday'}
     if authenticate_user(data['username'],data['password'])==True:
         daily,error = check_data(data)
+        if len(error) > 0:
+            raise BadRequest(", ".join(error))
         ar = np.array([daily])
         X_test_user = pd.DataFrame(ar, columns=['mean_weathersit','mean_atemp', 'sum_cnt', 'weekday'])
         if len(error) == 0:
